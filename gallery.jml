@@ -1,4 +1,34 @@
 
+ListDelegate @ Item {
+    width: this.parent.width
+    height: 100
+    backgroundColor: "white"
+    borderStyle: "solid"
+    borderWidth: "1px 0 0 0"
+    borderColor: "lightgray"
+
+    Image {
+        id: image
+        width: this.parent.height
+        height: this.parent.height
+        src: this.parent.modelData.image
+        backgroundSize: "cover"
+        backgroundPosition: "center"
+    }
+
+    Text {
+        left: this.image.left + this.image.width + 10
+        top: this.parent.height/2 - this.height/2
+        height: this.textHeight
+        text: this.parent.modelData.name
+        color: "#3C7DC1"
+    }
+
+    InputItem {
+        onactivated: this.parent.parent.parent.showAlbum(this.parent.modelData)
+    }
+}
+
 GridDelegate @ Item {
     width: this.parent.delegateSize
     height: this.parent.delegateSize
@@ -21,21 +51,60 @@ Window {
     width: this.innerWidth
     height: this.innerHeight
     overflow: "hidden"
-    currentView: this.gridView
+    currentView: this.listView
 
     function showImage(image): ^{
         this.fullscreenImage.src = image;
         this.currentView = this.fullscreenImage;
     }^
 
-    function back(): ^{
-        this.currentView = this.gridView
+    function showAlbum(album): ^{
+        this.currentView = this.gridView;
     }^
+
+    function back(): ^{
+        if (this.currentView === this.fullscreenImage)
+            this.currentView = this.gridView;
+        else if (this.currentView === this.gridView)
+            this.currentView = this.listView;
+    }^
+
+    Item {
+        id: listView
+        left: this.parent.currentView === this ? 0 : -this.width
+        width: this.parent.width
+        height: this.parent.height
+        overflow: "scroll"
+        delegate: ListDelegate;
+        delegateSize: this.width
+        delegates: []
+
+        Behavior {
+            left: "250ms"
+        }
+
+        function addDelegate(data): ^{
+            var delegate = this.createdelegate();
+            this.delegates.push(delegate);
+            delegate.modelData = data;
+            this.addChild(delegate);
+            delegate.initializeBindings();
+        }^
+
+        function layout(): ^{
+            var top = 0;
+
+            for (var i = 0; i < this.delegates.length; ++i) {
+                var d = this.delegates[i];
+                d.top = top;
+                top += d.height;
+            }
+        }^
+    }
 
     Item {
         id: gridView
         overflow: "scroll"
-        backgroundColor: "rgba(0,0,0,0.5)"
         delegate: GridDelegate;
         delegateSize: this.parent.innerWidth/3
         width: this.parent.width
@@ -100,5 +169,29 @@ Window {
         InputItem {
             onactivated: this.parent.parent.back();
         }
+    }
+
+    InputItem {
+        id: backButton
+        backgroundColor: "#3C7DC1"
+        width: this.parent.width
+        height: this.label.textHeight + 10
+        top: this.parent.height - (this.parent.currentView === this.listView ? 0 : this.height)
+
+        Behavior {
+            top: "250ms"
+        }
+
+        Text {
+            id: label
+            left: this.parent.width/2 - this.width/2
+            top: this.parent.height/2 - this.height/2
+            height: this.textHeight
+            width: this.textWidth
+            text: "BACK"
+            color: "white"
+        }
+
+        onactivated: this.parent.back();
     }
 }

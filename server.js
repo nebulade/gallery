@@ -5,6 +5,8 @@ var path = require('path');
 var os = require('os');
 var fs = require('fs');
 
+var gallery = require('./server/api_gallery.js');
+
 var argPath = process.argv[2] ? process.argv[2] : ".";
 var port = 80;
 var directory = argPath[0] !== "/" ? path.join(process.cwd(), argPath) : argPath;
@@ -28,25 +30,6 @@ for (var dev in ifaces) {
     });
 }
 
-// -- api
-function getAlbums() {
-    return fs.readdirSync(argPath + "/pictures/");
-}
-
-function getPictures(album) {
-    return fs.readdirSync(argPath + "/pictures/" + album);
-}
-
-app.get('/api/albums', function (req, res) {
-    console.log("Request albums");
-    res.contentType('json');
-    res.send({ albums: JSON.stringify(getAlbums()) });
-});
-
-app.get('/api/albums/:album/pictures', function (req, res) {
-    console.log("Request pictures for album", req.params.album);
-    res.contentType('json');
-    res.send({ pictures: JSON.stringify(getPictures(req.params.album))});
-});
+gallery.installRoutes(app);
 
 console.log(app.routes);

@@ -27,6 +27,41 @@ window.Quick.gallery = function () {
         }
     };
 
+    Quick.ListDelegate = function (id, parent) {
+        var e = new Quick.Item(id, parent);
+        e.addProperty("width", function () {return this.parent.width;});
+        e.addProperty("height", function () {return 100;});
+        e.addProperty("backgroundColor", function () {return "white";});
+        e.addProperty("borderStyle", function () {return "solid";});
+        e.addProperty("borderWidth", function () {return "1px 0 0 0";});
+        e.addProperty("borderColor", function () {return "lightgray";});
+        e.addChild((function() {
+            var e = new Quick.Image("image");
+            e.addProperty("width", function () {return this.parent.height;});
+            e.addProperty("height", function () {return this.parent.height;});
+            e.addProperty("src", function () {return this.parent.modelData.image;});
+            e.addProperty("backgroundSize", function () {return "cover";});
+            e.addProperty("backgroundPosition", function () {return "center";});
+            return e;
+        })());
+        e.addChild((function() {
+            var e = new Quick.Text();
+            e.addProperty("left", function () {return this.image.left + this.image.width + 10;});
+            e.addProperty("top", function () {return this.parent.height/2 - this.height/2;});
+            e.addProperty("height", function () {return this.textHeight;});
+            e.addProperty("text", function () {return this.parent.modelData.name;});
+            e.addProperty("color", function () {return "#3C7DC1";});
+            return e;
+        })());
+        e.addChild((function() {
+            var e = new Quick.InputItem();
+            e.addEventHandler("onactivated", function () {
+            this.parent.parent.parent.showAlbum(this.parent.modelData)
+            });
+            return e;
+        })());
+        return e;
+    };
     Quick.GridDelegate = function (id, parent) {
         var e = new Quick.Item(id, parent);
         e.addProperty("width", function () {return this.parent.delegateSize;});
@@ -54,22 +89,67 @@ window.Quick.gallery = function () {
         e.addProperty("width", function () {return this.innerWidth;});
         e.addProperty("height", function () {return this.innerHeight;});
         e.addProperty("overflow", function () {return "hidden";});
-        e.addProperty("currentView", function () {return this.gridView;});
+        e.addProperty("currentView", function () {return this.listView;});
         e.addFunction("showImage", function (image) {
         
         this.fullscreenImage.src = image;
         this.currentView = this.fullscreenImage;
     
         });
+        e.addFunction("showAlbum", function (album) {
+        
+        this.currentView = this.gridView;
+    
+        });
         e.addFunction("back", function () {
         
-        this.currentView = this.gridView
+        if (this.currentView === this.fullscreenImage)
+            this.currentView = this.gridView;
+        else if (this.currentView === this.gridView)
+            this.currentView = this.listView;
     
         });
         e.addChild((function() {
+            var e = new Quick.Item("listView");
+            e.addProperty("left", function () {return this.parent.currentView === this ? 0 : -this.width;});
+            e.addProperty("width", function () {return this.parent.width;});
+            e.addProperty("height", function () {return this.parent.height;});
+            e.addProperty("overflow", function () {return "scroll";});
+            e.addProperty("delegateSize", function () {return this.width;});
+            e.addProperty("delegates", function () {return [];});
+            e.addFunction("addDelegate", function (data) {
+            
+            var delegate = this.createdelegate();
+            this.delegates.push(delegate);
+            delegate.modelData = data;
+            this.addChild(delegate);
+            delegate.initializeBindings();
+        
+            });
+            e.addFunction("layout", function () {
+            
+            var top = 0;
+
+            for (var i = 0; i < this.delegates.length; ++i) {
+                var d = this.delegates[i];
+                d.top = top;
+                top += d.height;
+            }
+        
+            });
+            e.createdelegate = function () {
+                return new Quick.ListDelegate();
+            }
+            e.addChild((function() {
+                var e = new Quick.Behavior();
+                e.addProperty("left", function () {return "250ms";});
+                return e;
+            })());
+            return e;
+        })());
+        e.addChild((function() {
             var e = new Quick.Item("gridView");
             e.addProperty("overflow", function () {return "scroll";});
-            e.addProperty("backgroundColor", function () {return "rgba(0,0,0,0.5)";});
             e.addProperty("delegateSize", function () {return this.parent.innerWidth/3;});
             e.addProperty("width", function () {return this.parent.width;});
             e.addProperty("height", function () {return this.parent.height;});
@@ -142,6 +222,32 @@ window.Quick.gallery = function () {
                 e.addEventHandler("onactivated", function () {
                 this.parent.parent.back()
                 });
+                return e;
+            })());
+            return e;
+        })());
+        e.addChild((function() {
+            var e = new Quick.InputItem("backButton");
+            e.addProperty("backgroundColor", function () {return "#3C7DC1";});
+            e.addProperty("width", function () {return this.parent.width;});
+            e.addProperty("height", function () {return this.label.textHeight + 10;});
+            e.addProperty("top", function () {return this.parent.height - (this.parent.currentView === this.listView ? 0 : this.height);});
+            e.addEventHandler("onactivated", function () {
+            this.parent.back()
+            });
+            e.addChild((function() {
+                var e = new Quick.Behavior();
+                e.addProperty("top", function () {return "250ms";});
+                return e;
+            })());
+            e.addChild((function() {
+                var e = new Quick.Text("label");
+                e.addProperty("left", function () {return this.parent.width/2 - this.width/2;});
+                e.addProperty("top", function () {return this.parent.height/2 - this.height/2;});
+                e.addProperty("height", function () {return this.textHeight;});
+                e.addProperty("width", function () {return this.textWidth;});
+                e.addProperty("text", function () {return "BACK";});
+                e.addProperty("color", function () {return "white";});
                 return e;
             })());
             return e;
