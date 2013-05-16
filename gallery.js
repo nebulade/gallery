@@ -6,10 +6,10 @@ function init () {
     var model = [];
     var i;
 
-    for (i = 16; i < 30; ++i) {
+    for (i = 16; i < 49; ++i) {
         model.push({
             name: "DSCF18" + i,
-            image: "../../fotos/DSCF18" + i + ".JPG"
+            image: "./pictures/DSC000" + i + ".JPG"
         });
     }
 
