@@ -1,0 +1,62 @@
+
+GridDelegate @ Item {
+    width: this.parent.delegateSize
+    height: this.parent.delegateSize
+
+    Image {
+        width: this.parent.width
+        height: this.parent.height
+        src: this.parent.modelData.image
+        backgroundSize: "cover"
+        backgroundPosition: "center"
+    }
+}
+
+Window {
+    id: window
+    width: this.innerWidth
+    height: this.innerHeight
+    backgroundColor: "lightgray"
+    overlfow: "hidden"
+
+    Item {
+        id: gridView
+        overflow: "scroll"
+        backgroundColor: "rgba(0,0,0,0.5)"
+        delegate: GridDelegate;
+        delegateSize: 200
+        left: 10
+        top: 10
+        width: this.parent.width - this.left*2
+        height: this.parent.height - this.top*2
+        delegates: []
+
+        function addDelegate(data): ^{
+            var delegate = this.createdelegate();
+            this.delegates.push(delegate);
+            delegate.modelData = data;
+            this.addChild(delegate);
+            delegate.initializeBindings();
+        }^
+
+        function layout(): ^{
+            var left = 0;
+            var top = 0;
+            var delegatesPerLine = Math.ceil(this.width / this.delegateSize);
+
+            for (var i = 0; i < this.delegates.length; ++i) {
+                var d = this.delegates[i];
+
+                d.left = left;
+                d.top = top;
+
+                if ((i+1) % delegatesPerLine) {
+                    left += d.width;
+                } else {
+                    top += d.height;
+                    left = 0;
+                }
+            }
+        }^
+    }
+}
