@@ -48,9 +48,6 @@ app.loadAlbum = function (album) {
 };
 
 function init () {
-    app.pictures = [];
-    app.albums = [];
-
     get('/albums', function (error, result) {
         if (error) {
             console.error(error);
@@ -65,13 +62,6 @@ function init () {
 
         app.ui.window.listView.layout();
     });
-
-    for (var i = 16; i < 49; ++i) {
-        app.pictures.push({
-            name: "DSCF18" + i,
-            image: "./pictures/2013/DSC000" + i + ".JPG"
-        });
-    }
 
     Quick.useQueryFlags();
     app.ui = Quick.gallery();

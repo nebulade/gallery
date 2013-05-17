@@ -2,10 +2,8 @@
 ListDelegate @ Item {
     width: this.parent.width
     height: 100
-    backgroundColor: "black"
-    borderStyle: "solid"
-    borderWidth: "1px 0 0 0"
-    borderColor: "darkgray"
+    backgroundColor: this.ma.mousePressed ? "#3C7DC1" : "black"
+    overflow: "hidden"
 
     Image {
         id: image
@@ -21,11 +19,12 @@ ListDelegate @ Item {
         top: this.parent.height/2 - this.height/2
         height: this.textHeight
         text: this.parent.modelData.name
-        color: "#3C7DC1"
+        color: this.ma.mousePressed ? "white" : "#3C7DC1"
         fontSize: 32
     }
 
     InputItem {
+        id: ma
         onactivated: this.parent.parent.parent.showAlbum(this.parent.modelData)
     }
 }
@@ -33,6 +32,7 @@ ListDelegate @ Item {
 GridDelegate @ Item {
     width: this.parent.delegateSize
     height: this.parent.delegateSize
+    overflow: "hidden"
 
     Image {
         width: this.parent.width
@@ -77,6 +77,7 @@ Window {
         width: this.parent.width
         height: this.parent.height
         overflow: "scroll"
+        -webkit-overflow-scrolling: "touch"
         delegate: ListDelegate;
         delegateSize: this.width
         delegates: []
@@ -107,6 +108,7 @@ Window {
     Item {
         id: gridView
         overflow: "scroll"
+        -webkit-overflow-scrolling: "touch"
         delegate: GridDelegate;
         delegateSize: this.parent.innerWidth/3
         width: this.parent.width

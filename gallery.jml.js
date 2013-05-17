@@ -31,10 +31,8 @@ window.Quick.gallery = function () {
         var e = new Quick.Item(id, parent);
         e.addProperty("width", function () {return this.parent.width;});
         e.addProperty("height", function () {return 100;});
-        e.addProperty("backgroundColor", function () {return "black";});
-        e.addProperty("borderStyle", function () {return "solid";});
-        e.addProperty("borderWidth", function () {return "1px 0 0 0";});
-        e.addProperty("borderColor", function () {return "darkgray";});
+        e.addProperty("backgroundColor", function () {return this.ma.mousePressed ? "#3C7DC1" : "black";});
+        e.addProperty("overflow", function () {return "hidden";});
         e.addChild((function() {
             var e = new Quick.Image("image");
             e.addProperty("width", function () {return this.parent.height;});
@@ -50,12 +48,12 @@ window.Quick.gallery = function () {
             e.addProperty("top", function () {return this.parent.height/2 - this.height/2;});
             e.addProperty("height", function () {return this.textHeight;});
             e.addProperty("text", function () {return this.parent.modelData.name;});
-            e.addProperty("color", function () {return "#3C7DC1";});
+            e.addProperty("color", function () {return this.ma.mousePressed ? "white" : "#3C7DC1";});
             e.addProperty("fontSize", function () {return 32;});
             return e;
         })());
         e.addChild((function() {
-            var e = new Quick.InputItem();
+            var e = new Quick.InputItem("ma");
             e.addEventHandler("onactivated", function () {
             this.parent.parent.parent.showAlbum(this.parent.modelData)
             });
@@ -67,6 +65,7 @@ window.Quick.gallery = function () {
         var e = new Quick.Item(id, parent);
         e.addProperty("width", function () {return this.parent.delegateSize;});
         e.addProperty("height", function () {return this.parent.delegateSize;});
+        e.addProperty("overflow", function () {return "hidden";});
         e.addChild((function() {
             var e = new Quick.Image();
             e.addProperty("width", function () {return this.parent.width;});
@@ -117,6 +116,7 @@ window.Quick.gallery = function () {
             e.addProperty("width", function () {return this.parent.width;});
             e.addProperty("height", function () {return this.parent.height;});
             e.addProperty("overflow", function () {return "scroll";});
+            e.addProperty("-webkit-overflow-scrolling", function () {return "touch";});
             e.addProperty("delegateSize", function () {return this.width;});
             e.addProperty("delegates", function () {return [];});
             e.addFunction("addDelegate", function (data) {
@@ -152,6 +152,7 @@ window.Quick.gallery = function () {
         e.addChild((function() {
             var e = new Quick.Item("gridView");
             e.addProperty("overflow", function () {return "scroll";});
+            e.addProperty("-webkit-overflow-scrolling", function () {return "touch";});
             e.addProperty("delegateSize", function () {return this.parent.innerWidth/3;});
             e.addProperty("width", function () {return this.parent.width;});
             e.addProperty("height", function () {return this.parent.height;});
