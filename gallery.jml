@@ -2,16 +2,16 @@
 ListDelegate @ Item {
     width: this.parent.width
     height: 100
-    backgroundColor: "white"
+    backgroundColor: "black"
     borderStyle: "solid"
     borderWidth: "1px 0 0 0"
-    borderColor: "lightgray"
+    borderColor: "darkgray"
 
     Image {
         id: image
         width: this.parent.height
         height: this.parent.height
-        src: this.parent.modelData.image
+        src: this.parent.modelData.thumbnail
         backgroundSize: "cover"
         backgroundPosition: "center"
     }
@@ -22,6 +22,7 @@ ListDelegate @ Item {
         height: this.textHeight
         text: this.parent.modelData.name
         color: "#3C7DC1"
+        fontSize: 32
     }
 
     InputItem {
@@ -36,7 +37,7 @@ GridDelegate @ Item {
     Image {
         width: this.parent.width
         height: this.parent.height
-        src: this.parent.modelData.image
+        src: this.parent.modelData.thumbnail
         backgroundSize: "cover"
         backgroundPosition: "center"
     }
@@ -59,6 +60,7 @@ Window {
     }^
 
     function showAlbum(album): ^{
+        app.loadAlbum(album);
         this.currentView = this.gridView;
     }^
 
@@ -109,12 +111,17 @@ Window {
         delegateSize: this.parent.innerWidth/3
         width: this.parent.width
         height: this.parent.height
-        left: this.parent.currentView === this ? 0 : -this.width
+        left: this.parent.currentView === this ? 0 : this.width
         delegates: []
 
         Behavior {
             left: "250ms"
         }
+
+        function clear(): ^{
+            this.removeChildren();
+            this.delegates = [];
+        }^
 
         function addDelegate(data): ^{
             var delegate = this.createdelegate();
@@ -151,6 +158,7 @@ Window {
         width: this.parent.innerWidth
         height: this.parent.innerHeight
         left: this.parent.currentView === this ? 0 : this.width
+        opacity: this.parent.currentView === this ? 1 : 0
         backgroundColor: "black"
 
         Image {
@@ -164,10 +172,7 @@ Window {
 
         Behavior {
             left: "250ms"
-        }
-
-        InputItem {
-            onactivated: this.parent.parent.back();
+            opacity: "1000ms"
         }
     }
 
@@ -190,6 +195,7 @@ Window {
             width: this.textWidth
             text: "BACK"
             color: "white"
+            fontSize: 32
         }
 
         onactivated: this.parent.back();

@@ -31,15 +31,15 @@ window.Quick.gallery = function () {
         var e = new Quick.Item(id, parent);
         e.addProperty("width", function () {return this.parent.width;});
         e.addProperty("height", function () {return 100;});
-        e.addProperty("backgroundColor", function () {return "white";});
+        e.addProperty("backgroundColor", function () {return "black";});
         e.addProperty("borderStyle", function () {return "solid";});
         e.addProperty("borderWidth", function () {return "1px 0 0 0";});
-        e.addProperty("borderColor", function () {return "lightgray";});
+        e.addProperty("borderColor", function () {return "darkgray";});
         e.addChild((function() {
             var e = new Quick.Image("image");
             e.addProperty("width", function () {return this.parent.height;});
             e.addProperty("height", function () {return this.parent.height;});
-            e.addProperty("src", function () {return this.parent.modelData.image;});
+            e.addProperty("src", function () {return this.parent.modelData.thumbnail;});
             e.addProperty("backgroundSize", function () {return "cover";});
             e.addProperty("backgroundPosition", function () {return "center";});
             return e;
@@ -51,6 +51,7 @@ window.Quick.gallery = function () {
             e.addProperty("height", function () {return this.textHeight;});
             e.addProperty("text", function () {return this.parent.modelData.name;});
             e.addProperty("color", function () {return "#3C7DC1";});
+            e.addProperty("fontSize", function () {return 32;});
             return e;
         })());
         e.addChild((function() {
@@ -70,7 +71,7 @@ window.Quick.gallery = function () {
             var e = new Quick.Image();
             e.addProperty("width", function () {return this.parent.width;});
             e.addProperty("height", function () {return this.parent.height;});
-            e.addProperty("src", function () {return this.parent.modelData.image;});
+            e.addProperty("src", function () {return this.parent.modelData.thumbnail;});
             e.addProperty("backgroundSize", function () {return "cover";});
             e.addProperty("backgroundPosition", function () {return "center";});
             return e;
@@ -98,6 +99,7 @@ window.Quick.gallery = function () {
         });
         e.addFunction("showAlbum", function (album) {
         
+        app.loadAlbum(album);
         this.currentView = this.gridView;
     
         });
@@ -153,8 +155,14 @@ window.Quick.gallery = function () {
             e.addProperty("delegateSize", function () {return this.parent.innerWidth/3;});
             e.addProperty("width", function () {return this.parent.width;});
             e.addProperty("height", function () {return this.parent.height;});
-            e.addProperty("left", function () {return this.parent.currentView === this ? 0 : -this.width;});
+            e.addProperty("left", function () {return this.parent.currentView === this ? 0 : this.width;});
             e.addProperty("delegates", function () {return [];});
+            e.addFunction("clear", function () {
+            
+            this.removeChildren();
+            this.delegates = [];
+        
+            });
             e.addFunction("addDelegate", function (data) {
             
             var delegate = this.createdelegate();
@@ -201,6 +209,7 @@ window.Quick.gallery = function () {
             e.addProperty("width", function () {return this.parent.innerWidth;});
             e.addProperty("height", function () {return this.parent.innerHeight;});
             e.addProperty("left", function () {return this.parent.currentView === this ? 0 : this.width;});
+            e.addProperty("opacity", function () {return this.parent.currentView === this ? 1 : 0;});
             e.addProperty("backgroundColor", function () {return "black";});
             e.addChild((function() {
                 var e = new Quick.Image();
@@ -215,13 +224,7 @@ window.Quick.gallery = function () {
             e.addChild((function() {
                 var e = new Quick.Behavior();
                 e.addProperty("left", function () {return "250ms";});
-                return e;
-            })());
-            e.addChild((function() {
-                var e = new Quick.InputItem();
-                e.addEventHandler("onactivated", function () {
-                this.parent.parent.back()
-                });
+                e.addProperty("opacity", function () {return "1000ms";});
                 return e;
             })());
             return e;
@@ -248,6 +251,7 @@ window.Quick.gallery = function () {
                 e.addProperty("width", function () {return this.textWidth;});
                 e.addProperty("text", function () {return "BACK";});
                 e.addProperty("color", function () {return "white";});
+                e.addProperty("fontSize", function () {return 32;});
                 return e;
             })());
             return e;
