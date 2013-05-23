@@ -34,22 +34,19 @@ window.Quick.gallery = function () {
         e.addProperty("backgroundColor", function () {return this.ma.mousePressed ? "#3C7DC1" : "black";});
         e.addProperty("overflow", function () {return "hidden";});
         e.addChild((function() {
-            var e = new Quick.Image("image");
+            var e = new Quick.BackgroundImage("image");
             e.addProperty("width", function () {return this.parent.height;});
             e.addProperty("height", function () {return this.parent.height;});
             e.addProperty("src", function () {return this.parent.modelData.thumbnail;});
             e.addProperty("backgroundSize", function () {return "cover";});
-            e.addProperty("backgroundPosition", function () {return "center";});
             return e;
         })());
         e.addChild((function() {
-            var e = new Quick.Text();
+            var e = new Quick.Label();
             e.addProperty("left", function () {return this.image.left + this.image.width + 10;});
             e.addProperty("top", function () {return this.parent.height/2 - this.height/2;});
-            e.addProperty("height", function () {return this.textHeight;});
             e.addProperty("text", function () {return this.parent.modelData.name;});
             e.addProperty("color", function () {return this.ma.mousePressed ? "white" : "#3C7DC1";});
-            e.addProperty("fontSize", function () {return 32;});
             return e;
         })());
         e.addChild((function() {
@@ -67,12 +64,11 @@ window.Quick.gallery = function () {
         e.addProperty("height", function () {return this.parent.delegateSize;});
         e.addProperty("overflow", function () {return "hidden";});
         e.addChild((function() {
-            var e = new Quick.Image();
+            var e = new Quick.BackgroundImage();
             e.addProperty("width", function () {return this.parent.width;});
             e.addProperty("height", function () {return this.parent.height;});
             e.addProperty("src", function () {return this.parent.modelData.thumbnail;});
             e.addProperty("backgroundSize", function () {return "cover";});
-            e.addProperty("backgroundPosition", function () {return "center";});
             return e;
         })());
         e.addChild((function() {
@@ -92,8 +88,14 @@ window.Quick.gallery = function () {
         e.addProperty("currentView", function () {return this.listView;});
         e.addFunction("showImage", function (image) {
         
-        this.fullscreenImage.src = image;
-        this.currentView = this.fullscreenImage;
+        console.log("-- load image", image);
+        var that = this;
+        var i = new Image();
+        i.onload = function () {
+            that.fullscreenImage.src = image;
+            that.currentView = that.fullscreenImage;
+        };
+        i.src = image;
     
         });
         e.addFunction("showAlbum", function (album) {
@@ -111,34 +113,8 @@ window.Quick.gallery = function () {
     
         });
         e.addChild((function() {
-            var e = new Quick.Item("listView");
+            var e = new Quick.ListView("listView");
             e.addProperty("left", function () {return this.parent.currentView === this ? 0 : -this.width;});
-            e.addProperty("width", function () {return this.parent.width;});
-            e.addProperty("height", function () {return this.parent.height;});
-            e.addProperty("overflow", function () {return "scroll";});
-            e.addProperty("-webkit-overflow-scrolling", function () {return "touch";});
-            e.addProperty("delegateSize", function () {return this.width;});
-            e.addProperty("delegates", function () {return [];});
-            e.addFunction("addDelegate", function (data) {
-            
-            var delegate = this.createdelegate();
-            this.delegates.push(delegate);
-            delegate.modelData = data;
-            this.addChild(delegate);
-            delegate.initializeBindings();
-        
-            });
-            e.addFunction("layout", function () {
-            
-            var top = 0;
-
-            for (var i = 0; i < this.delegates.length; ++i) {
-                var d = this.delegates[i];
-                d.top = top;
-                top += d.height;
-            }
-        
-            });
             e.createdelegate = function () {
                 return new Quick.ListDelegate();
             }
@@ -150,50 +126,11 @@ window.Quick.gallery = function () {
             return e;
         })());
         e.addChild((function() {
-            var e = new Quick.Item("gridView");
-            e.addProperty("overflow", function () {return "scroll";});
-            e.addProperty("-webkit-overflow-scrolling", function () {return "touch";});
-            e.addProperty("delegateSize", function () {return this.parent.innerWidth/3;});
+            var e = new Quick.GridView("gridView");
+            e.addProperty("delegateSize", function () {return this.parent.innerWidth/3.0;});
             e.addProperty("width", function () {return this.parent.width;});
             e.addProperty("height", function () {return this.parent.height;});
             e.addProperty("left", function () {return this.parent.currentView === this ? 0 : this.width;});
-            e.addProperty("delegates", function () {return [];});
-            e.addFunction("clear", function () {
-            
-            this.removeChildren();
-            this.delegates = [];
-        
-            });
-            e.addFunction("addDelegate", function (data) {
-            
-            var delegate = this.createdelegate();
-            this.delegates.push(delegate);
-            delegate.modelData = data;
-            this.addChild(delegate);
-            delegate.initializeBindings();
-        
-            });
-            e.addFunction("layout", function () {
-            
-            var left = 0;
-            var top = 0;
-            var delegatesPerLine = Math.ceil(this.width / this.delegateSize);
-
-            for (var i = 0; i < this.delegates.length; ++i) {
-                var d = this.delegates[i];
-
-                d.left = left;
-                d.top = top;
-
-                if ((i+1) % delegatesPerLine) {
-                    left += d.width;
-                } else {
-                    top += d.height;
-                    left = 0;
-                }
-            }
-        
-            });
             e.createdelegate = function () {
                 return new Quick.GridDelegate();
             }
@@ -213,11 +150,11 @@ window.Quick.gallery = function () {
             e.addProperty("opacity", function () {return this.parent.currentView === this ? 1 : 0;});
             e.addProperty("backgroundColor", function () {return "black";});
             e.addChild((function() {
-                var e = new Quick.Image();
-                e.addProperty("src", function () {return this.parent.src;});
+                var e = new Quick.Item();
+                e.addProperty("backgroundImage", function () {return "url('" + this.parent.src + "')";});
                 e.addProperty("backgroundSize", function () {return "contain";});
                 e.addProperty("backgroundPosition", function () {return "center";});
-                e.addProperty("background-repeat", function () {return "no-repeat";});
+                e.addProperty("backgroundRepeat", function () {return "no-repeat";});
                 e.addProperty("width", function () {return this.parent.width;});
                 e.addProperty("height", function () {return this.parent.height;});
                 return e;
@@ -231,28 +168,16 @@ window.Quick.gallery = function () {
             return e;
         })());
         e.addChild((function() {
-            var e = new Quick.InputItem("backButton");
-            e.addProperty("backgroundColor", function () {return "#3C7DC1";});
+            var e = new Quick.Button("backButton");
             e.addProperty("width", function () {return this.parent.width;});
-            e.addProperty("height", function () {return this.label.textHeight + 10;});
             e.addProperty("top", function () {return this.parent.height - (this.parent.currentView === this.listView ? 0 : this.height);});
+            e.addProperty("label", function () {return "BACK";});
             e.addEventHandler("onactivated", function () {
             this.parent.back()
             });
             e.addChild((function() {
                 var e = new Quick.Behavior();
                 e.addProperty("top", function () {return "250ms";});
-                return e;
-            })());
-            e.addChild((function() {
-                var e = new Quick.Text("label");
-                e.addProperty("left", function () {return this.parent.width/2 - this.width/2;});
-                e.addProperty("top", function () {return this.parent.height/2 - this.height/2;});
-                e.addProperty("height", function () {return this.textHeight;});
-                e.addProperty("width", function () {return this.textWidth;});
-                e.addProperty("text", function () {return "BACK";});
-                e.addProperty("color", function () {return "white";});
-                e.addProperty("fontSize", function () {return 32;});
                 return e;
             })());
             return e;

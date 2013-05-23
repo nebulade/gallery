@@ -5,22 +5,19 @@ ListDelegate @ Item {
     backgroundColor: this.ma.mousePressed ? "#3C7DC1" : "black"
     overflow: "hidden"
 
-    Image {
+    BackgroundImage {
         id: image
         width: this.parent.height
         height: this.parent.height
         src: this.parent.modelData.thumbnail
         backgroundSize: "cover"
-        backgroundPosition: "center"
     }
 
-    Text {
+    Label {
         left: this.image.left + this.image.width + 10
         top: this.parent.height/2 - this.height/2
-        height: this.textHeight
         text: this.parent.modelData.name
         color: this.ma.mousePressed ? "white" : "#3C7DC1"
-        fontSize: 32
     }
 
     InputItem {
@@ -34,12 +31,11 @@ GridDelegate @ Item {
     height: this.parent.delegateSize
     overflow: "hidden"
 
-    Image {
+    BackgroundImage {
         width: this.parent.width
         height: this.parent.height
         src: this.parent.modelData.thumbnail
         backgroundSize: "cover"
-        backgroundPosition: "center"
     }
 
     InputItem {
@@ -55,8 +51,14 @@ Window {
     currentView: this.listView
 
     function showImage(image): ^{
-        this.fullscreenImage.src = image;
-        this.currentView = this.fullscreenImage;
+        console.log("-- load image", image);
+        var that = this;
+        var i = new Image();
+        i.onload = function () {
+            that.fullscreenImage.src = image;
+            that.currentView = that.fullscreenImage;
+        };
+        i.src = image;
     }^
 
     function showAlbum(album): ^{
@@ -71,87 +73,27 @@ Window {
             this.currentView = this.listView;
     }^
 
-    Item {
+    ListView {
         id: listView
         left: this.parent.currentView === this ? 0 : -this.width
-        width: this.parent.width
-        height: this.parent.height
-        overflow: "scroll"
-        -webkit-overflow-scrolling: "touch"
         delegate: ListDelegate;
-        delegateSize: this.width
-        delegates: []
 
         Behavior {
             left: "250ms"
         }
-
-        function addDelegate(data): ^{
-            var delegate = this.createdelegate();
-            this.delegates.push(delegate);
-            delegate.modelData = data;
-            this.addChild(delegate);
-            delegate.initializeBindings();
-        }^
-
-        function layout(): ^{
-            var top = 0;
-
-            for (var i = 0; i < this.delegates.length; ++i) {
-                var d = this.delegates[i];
-                d.top = top;
-                top += d.height;
-            }
-        }^
     }
 
-    Item {
+    GridView {
         id: gridView
-        overflow: "scroll"
-        -webkit-overflow-scrolling: "touch"
         delegate: GridDelegate;
-        delegateSize: this.parent.innerWidth/3
+        delegateSize: this.parent.innerWidth/3.0
         width: this.parent.width
         height: this.parent.height
         left: this.parent.currentView === this ? 0 : this.width
-        delegates: []
 
         Behavior {
             left: "250ms"
         }
-
-        function clear(): ^{
-            this.removeChildren();
-            this.delegates = [];
-        }^
-
-        function addDelegate(data): ^{
-            var delegate = this.createdelegate();
-            this.delegates.push(delegate);
-            delegate.modelData = data;
-            this.addChild(delegate);
-            delegate.initializeBindings();
-        }^
-
-        function layout(): ^{
-            var left = 0;
-            var top = 0;
-            var delegatesPerLine = Math.ceil(this.width / this.delegateSize);
-
-            for (var i = 0; i < this.delegates.length; ++i) {
-                var d = this.delegates[i];
-
-                d.left = left;
-                d.top = top;
-
-                if ((i+1) % delegatesPerLine) {
-                    left += d.width;
-                } else {
-                    top += d.height;
-                    left = 0;
-                }
-            }
-        }^
     }
 
     Item {
@@ -163,11 +105,11 @@ Window {
         opacity: this.parent.currentView === this ? 1 : 0
         backgroundColor: "black"
 
-        Image {
-            src: this.parent.src
+        Item {
+            backgroundImage: "url('" + this.parent.src + "')"
             backgroundSize: "contain"
             backgroundPosition: "center"
-            background-repeat: "no-repeat"
+            backgroundRepeat: "no-repeat"
             width: this.parent.width
             height: this.parent.height
         }
@@ -178,26 +120,14 @@ Window {
         }
     }
 
-    InputItem {
+    Button {
         id: backButton
-        backgroundColor: "#3C7DC1"
         width: this.parent.width
-        height: this.label.textHeight + 10
         top: this.parent.height - (this.parent.currentView === this.listView ? 0 : this.height)
+        label: "BACK"
 
         Behavior {
             top: "250ms"
-        }
-
-        Text {
-            id: label
-            left: this.parent.width/2 - this.width/2
-            top: this.parent.height/2 - this.height/2
-            height: this.textHeight
-            width: this.textWidth
-            text: "BACK"
-            color: "white"
-            fontSize: 32
         }
 
         onactivated: this.parent.back();

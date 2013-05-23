@@ -80,6 +80,10 @@ var tokenizer = (function () {
                 break;
             }
 
+            if (c === '\n') {
+                ++line;
+            }
+
             block += c;
 
             advance();
@@ -947,11 +951,10 @@ Quick.Rectangle = function (id, parent) {
     return elem;
 };
 
-Quick.Image = function (id, parent) {
+Quick.BackgroundImage = function (id, parent) {
     var elem = new Quick.Item(id, parent);
 
-    elem.addProperty("textAlign", "center");
-    elem.addProperty("src", "image.png");
+    elem.addProperty("src", "");
     elem.addProperty("backgroundImage", function () {
         if (!this.src) {
             return "";
@@ -962,6 +965,19 @@ Quick.Image = function (id, parent) {
         }
 
         return "url('" + this.src + "')";
+    });
+    elem.addProperty("backgroundPosition", "center");
+    elem.addProperty("backgroundRepeat", "no-repeat");
+
+    return elem;
+};
+
+Quick.Image = function (id, parent) {
+    var elem = new Quick.Item(id, parent, "image");
+
+    elem.addProperty("src", "");
+    elem.addProperty("-image-src", function () {
+        return this.src;
     });
 
     return elem;
@@ -995,6 +1011,8 @@ Quick.RendererDOM.prototype.createElement = function (typeHint, object) {
 
     if (typeHint === 'input') {
         elem = document.createElement('input');
+    } else if (typeHint === 'image') {
+        elem = document.createElement('img');
     } else {
         elem = document.createElement('div');
         elem.style.position = 'absolute';
@@ -1178,6 +1196,8 @@ Quick.RendererDOM.prototype.renderElement = function (element) {
             element.element.style['transform'] = tmp;
         } else if (name === '-text') {
             element.element.innerHTML = element[name];
+        } else if (name === '-image-src') {
+            element.element.src = element[name];
         } else if (name === 'placeholder') {
             element.element.placeholder = element[name];
         } else {
