@@ -1,6 +1,7 @@
 "use strict";
 
 var app = {};
+var client;
 
 function get(query, callback) {
     var xhr = new XMLHttpRequest();
@@ -31,7 +32,9 @@ function get(query, callback) {
 app.loadAlbum = function (album) {
     app.ui.window.gridView.clear();
 
-    get('/albums/' + album.name + "/pictures", function (error, result) {
+    console.log("load album", album);
+
+    client.readdir(album.path, function (error, result) {
         if (error) {
             console.error(error);
             return;
@@ -40,30 +43,91 @@ app.loadAlbum = function (album) {
         console.log("-- Pictures", result);
 
         for (var i = 0; i < result.length; ++i) {
-            app.ui.window.gridView.addDelegate(result[i]);
+            var fullPath = album.path + "/" + result[i];
+            var thumbnailUrl = client.thumbnailUrl(fullPath, { size: "large" });
+            var imageUrl = client.thumbnailUrl(fullPath, { size: "xl" });
+            app.ui.window.gridView.addDelegate({name: result[i], image: imageUrl, thumbnail: thumbnailUrl});
         }
 
         app.ui.window.gridView.layout();
     });
 };
 
-function init () {
-    get('/albums', function (error, result) {
+function listAlbums (albumRoot) {
+    client.readdir(albumRoot ? albumRoot : "/", function (error, result) {
         if (error) {
             console.error(error);
             return;
         }
 
-        console.log("-- Albums", result);
+        console.log("-- Albums " + result.join(", "));
 
-        for (var j = 0; j < result.length; ++j) {
-            app.ui.window.listView.addDelegate(result[j]);
+        for (var i = 0; i < result.length; ++i) {
+            app.ui.window.listView.addDelegate({name: result[i], path: albumRoot + "/" + result[i], thumbnail: ""});
         }
 
         app.ui.window.listView.layout();
+    });
+}
+
+function init () {
+    // get('/albums', function (error, result) {
+    //     if (error) {
+    //         console.error(error);
+    //         return;
+    //     }
+
+    //     console.log("-- Albums", result);
+
+    //     for (var j = 0; j < result.length; ++j) {
+    //         app.ui.window.listView.addDelegate(result[j]);
+    //     }
+
+    //     app.ui.window.listView.layout();
+    // });
+
+    client = new Dropbox.Client({
+        key: "wSDThTFVZRA=|jB82mur0JL3wTQY3QlxRLiX2HbVeA+yqsSpsG0kMZQ=="
+    });
+    client.authDriver(new Dropbox.Drivers.Redirect({ rememberUser: true }));
+
+    client.authenticate(function (error, client) {
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        console.log(client);
+
+        if (!client.isAuthenticated()) {
+            initAuthenticated();
+        } else {
+            client.authenticate(function (error, client) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+
+                console.log(client);
+                initAuthenticated();
+            });
+        }
     });
 
     Quick.useQueryFlags();
     app.ui = Quick.gallery();
     Quick.Engine.start();
+}
+
+function initAuthenticated() {
+    client.getUserInfo(function(error, userInfo) {
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        console.log("Hello, " + userInfo.name + "!");
+    });
+
+    listAlbums("Photos");
 }
