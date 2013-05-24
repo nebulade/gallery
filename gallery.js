@@ -7,7 +7,7 @@ app.loadAlbum = function (album) {
 
     console.log("load album", album);
 
-    app.client.readdir(album.path, function (error, result) {
+    app.client.readdir(album.path, function (error, result, folderStat, resultsStat) {
         if (error) {
             console.error(error);
             return;
@@ -16,10 +16,29 @@ app.loadAlbum = function (album) {
         console.log("-- Pictures", result);
 
         for (var i = 0; i < result.length; ++i) {
-            var fullPath = album.path + "/" + result[i];
-            var thumbnailUrl = app.client.thumbnailUrl(fullPath, { size: "large" });
-            var imageUrl = app.client.thumbnailUrl(fullPath, { size: "xl" });
-            app.ui.window.gridView.addDelegate({name: result[i], image: imageUrl, thumbnail: thumbnailUrl});
+            var stat = resultsStat[i];
+
+            // ignore folder and files without thumbnail
+            if (stat.isFolder || !stat.hasThumbnail) {
+                continue;
+            }
+
+            (function () {
+                var fullPath = album.path + "/" + result[i];
+                var thumbnailUrl = app.client.thumbnailUrl(fullPath, { size: "l" });
+                var imageUrl = app.client.thumbnailUrl(fullPath, { size: "l" });
+                var delegate = app.ui.window.gridView.addDelegate({name: result[i], image: imageUrl, thumbnail: thumbnailUrl});
+
+                app.client.makeUrl(fullPath, { download: true }, function (error, result) {
+                    if (error) {
+                        console.error(error);
+                    }
+
+                    if (result) {
+                        delegate.image = result.url;
+                    }
+                });
+            })();
         }
 
         app.ui.window.gridView.layout();

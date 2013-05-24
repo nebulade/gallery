@@ -58,11 +58,96 @@ window.Quick.gallery = function () {
         })());
         return e;
     };
+    Quick.BusyIndicator = function (id, parent) {
+        var e = new Quick.Item(id, parent);
+        e.addProperty("height", function () {return 10;});
+        e.addProperty("width", function () {return 70;});
+        e.addProperty("currentActive", function () {return this.one;});
+        e.addEventHandler("onload", function () {
+        
+        var that = this;
+        setInterval(function () {
+            var a = that.currentActive;
+            if (a === that.one) {
+                that.currentActive = that.two;
+            } else if (a === that.two) {
+                that.currentActive = that.three;
+            } else if (a === that.three) {
+                that.currentActive = that.four;
+            } else if (a === that.four) {
+                that.currentActive = that.one;
+            }
+        }, 300);
+    
+        });
+        e.addChild((function() {
+            var e = new Quick.Item("one");
+            e.addProperty("top", function () {return 0;});
+            e.addProperty("left", function () {return 0;});
+            e.addProperty("backgroundColor", function () {return "#3C7DC1";});
+            e.addProperty("width", function () {return 10;});
+            e.addProperty("height", function () {return 10;});
+            e.addProperty("opacity", function () {return this.parent.currentActive === this ? 1 : 0;});
+            e.addChild((function() {
+                var e = new Quick.Behavior();
+                e.addProperty("opacity", function () {return "250ms";});
+                return e;
+            })());
+            return e;
+        })());
+        e.addChild((function() {
+            var e = new Quick.Item("two");
+            e.addProperty("top", function () {return 0;});
+            e.addProperty("left", function () {return 20;});
+            e.addProperty("backgroundColor", function () {return "#3C7DC1";});
+            e.addProperty("width", function () {return 10;});
+            e.addProperty("height", function () {return 10;});
+            e.addProperty("opacity", function () {return this.parent.currentActive === this ? 1 : 0;});
+            e.addChild((function() {
+                var e = new Quick.Behavior();
+                e.addProperty("opacity", function () {return "250ms";});
+                return e;
+            })());
+            return e;
+        })());
+        e.addChild((function() {
+            var e = new Quick.Item("three");
+            e.addProperty("top", function () {return 0;});
+            e.addProperty("left", function () {return 40;});
+            e.addProperty("backgroundColor", function () {return "#3C7DC1";});
+            e.addProperty("width", function () {return 10;});
+            e.addProperty("height", function () {return 10;});
+            e.addProperty("opacity", function () {return this.parent.currentActive === this ? 1 : 0;});
+            e.addChild((function() {
+                var e = new Quick.Behavior();
+                e.addProperty("opacity", function () {return "250ms";});
+                return e;
+            })());
+            return e;
+        })());
+        e.addChild((function() {
+            var e = new Quick.Item("four");
+            e.addProperty("top", function () {return 0;});
+            e.addProperty("left", function () {return 60;});
+            e.addProperty("backgroundColor", function () {return "#3C7DC1";});
+            e.addProperty("width", function () {return 10;});
+            e.addProperty("height", function () {return 10;});
+            e.addProperty("opacity", function () {return this.parent.currentActive === this ? 1 : 0;});
+            e.addChild((function() {
+                var e = new Quick.Behavior();
+                e.addProperty("opacity", function () {return "250ms";});
+                return e;
+            })());
+            return e;
+        })());
+        return e;
+    };
     Quick.GridDelegate = function (id, parent) {
         var e = new Quick.Item(id, parent);
         e.addProperty("width", function () {return this.parent.delegateSize;});
         e.addProperty("height", function () {return this.parent.delegateSize;});
         e.addProperty("overflow", function () {return "hidden";});
+        e.addProperty("image", function () {return "";});
         e.addChild((function() {
             var e = new Quick.BackgroundImage();
             e.addProperty("width", function () {return this.parent.width;});
@@ -74,7 +159,7 @@ window.Quick.gallery = function () {
         e.addChild((function() {
             var e = new Quick.InputItem();
             e.addEventHandler("onactivated", function () {
-            this.parent.parent.parent.showImage(this.parent.modelData.image)
+            this.parent.parent.parent.showImage(this.parent.image)
             });
             return e;
         })());
@@ -90,12 +175,12 @@ window.Quick.gallery = function () {
         
         console.log("-- load image", image);
         var that = this;
-        var i = new Image();
-        i.onload = function () {
+        // var i = new Image();
+        // i.onload = function () {
             that.fullscreenImage.src = image;
             that.currentView = that.fullscreenImage;
-        };
-        i.src = image;
+        // };
+        // i.src = image;
     
         });
         e.addFunction("showAlbum", function (album) {
@@ -150,11 +235,15 @@ window.Quick.gallery = function () {
             e.addProperty("opacity", function () {return this.parent.currentView === this ? 1 : 0;});
             e.addProperty("backgroundColor", function () {return "black";});
             e.addChild((function() {
-                var e = new Quick.Item();
-                e.addProperty("backgroundImage", function () {return "url('" + this.parent.src + "')";});
+                var e = new Quick.BusyIndicator();
+                e.addProperty("left", function () {return this.parent.width/2 - this.width/2;});
+                e.addProperty("top", function () {return this.parent.height/2 - this.height/2;});
+                return e;
+            })());
+            e.addChild((function() {
+                var e = new Quick.BackgroundImage();
+                e.addProperty("src", function () {return this.parent.src;});
                 e.addProperty("backgroundSize", function () {return "contain";});
-                e.addProperty("backgroundPosition", function () {return "center";});
-                e.addProperty("backgroundRepeat", function () {return "no-repeat";});
                 e.addProperty("width", function () {return this.parent.width;});
                 e.addProperty("height", function () {return this.parent.height;});
                 return e;

@@ -196,6 +196,7 @@ window.Quick.nebulon = function () {
         delegate.modelData = data;
         this.addChild(delegate);
         delegate.initializeBindings();
+        return delegate;
     
         });
         e.addFunction("layout", function () {
