@@ -192,8 +192,9 @@ window.Quick.nebulon = function () {
         e.addFunction("addDelegate", function (data) {
         
         var delegate = this.createdelegate();
-        this.delegates.push(delegate);
         delegate.modelData = data;
+        delegate.modelIndex = this.delegates.length;
+        this.delegates.push(delegate);
         this.addChild(delegate);
         delegate.initializeBindings();
         return delegate;

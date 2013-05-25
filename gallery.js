@@ -25,7 +25,7 @@ app.loadAlbum = function (album) {
 
             (function () {
                 var fullPath = album.path + "/" + result[i];
-                var thumbnailUrl = app.client.thumbnailUrl(fullPath, { size: "l" });
+                var thumbnailUrl = app.client.thumbnailUrl(fullPath, { size: "m" });
                 var imageUrl = app.client.thumbnailUrl(fullPath, { size: "l" });
                 var delegate = app.ui.window.gridView.addDelegate({name: result[i], image: imageUrl, thumbnail: thumbnailUrl});
 
@@ -34,7 +34,7 @@ app.loadAlbum = function (album) {
                         console.error(error);
                     }
 
-                    if (result) {
+                    if (result && delegate) {
                         delegate.image = result.url;
                     }
                 });
@@ -55,7 +55,7 @@ function listAlbums (albumRoot) {
         console.log("-- Albums " + result.join(", "));
 
         for (var i = 0; i < result.length; ++i) {
-            app.ui.window.listView.addDelegate({name: result[i], path: albumRoot + "/" + result[i], thumbnail: ""});
+            app.ui.window.listView.addDelegate({name: result[i], path: albumRoot + "/" + result[i], thumbnail: app.client.thumbnailUrl(albumRoot + "/" + result[i], { size: "l" })});
         }
 
         app.ui.window.listView.layout();

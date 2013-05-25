@@ -31,19 +31,11 @@ window.Quick.gallery = function () {
         var e = new Quick.Item(id, parent);
         e.addProperty("width", function () {return this.parent.width;});
         e.addProperty("height", function () {return 100;});
-        e.addProperty("backgroundColor", function () {return this.ma.mousePressed ? "#3C7DC1" : "black";});
+        e.addProperty("backgroundColor", function () {return this.ma.mousePressed ? "#3C7DC1" : (this.modelIndex % 2 ? "#0f0f0f" : "black");});
         e.addProperty("overflow", function () {return "hidden";});
         e.addChild((function() {
-            var e = new Quick.BackgroundImage("image");
-            e.addProperty("width", function () {return this.parent.height;});
-            e.addProperty("height", function () {return this.parent.height;});
-            e.addProperty("src", function () {return this.parent.modelData.thumbnail;});
-            e.addProperty("backgroundSize", function () {return "cover";});
-            return e;
-        })());
-        e.addChild((function() {
             var e = new Quick.Label();
-            e.addProperty("left", function () {return this.image.left + this.image.width + 10;});
+            e.addProperty("left", function () {return 10;});
             e.addProperty("top", function () {return this.parent.height/2 - this.height/2;});
             e.addProperty("text", function () {return this.parent.modelData.name;});
             e.addProperty("color", function () {return this.ma.mousePressed ? "white" : "#3C7DC1";});
@@ -212,9 +204,9 @@ window.Quick.gallery = function () {
         })());
         e.addChild((function() {
             var e = new Quick.GridView("gridView");
-            e.addProperty("delegateSize", function () {return this.parent.innerWidth/3.0;});
+            e.addProperty("delegateSize", function () {return this.parent.innerWidth/(this.parent.innerWidth < 600 ? 3 : 10);});
             e.addProperty("width", function () {return this.parent.width;});
-            e.addProperty("height", function () {return this.parent.height;});
+            e.addProperty("height", function () {return this.parent.height - this.backButton.height;});
             e.addProperty("left", function () {return this.parent.currentView === this ? 0 : this.width;});
             e.createdelegate = function () {
                 return new Quick.GridDelegate();
@@ -229,8 +221,8 @@ window.Quick.gallery = function () {
         e.addChild((function() {
             var e = new Quick.Item("fullscreenImage");
             e.addProperty("src", function () {return "";});
-            e.addProperty("width", function () {return this.parent.innerWidth;});
-            e.addProperty("height", function () {return this.parent.innerHeight;});
+            e.addProperty("width", function () {return this.parent.width;});
+            e.addProperty("height", function () {return this.parent.height - this.backButton.height;});
             e.addProperty("left", function () {return this.parent.currentView === this ? 0 : this.width;});
             e.addProperty("opacity", function () {return this.parent.currentView === this ? 1 : 0;});
             e.addProperty("backgroundColor", function () {return "black";});

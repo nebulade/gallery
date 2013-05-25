@@ -2,19 +2,11 @@
 ListDelegate @ Item {
     width: this.parent.width
     height: 100
-    backgroundColor: this.ma.mousePressed ? "#3C7DC1" : "black"
+    backgroundColor: this.ma.mousePressed ? "#3C7DC1" : (this.modelIndex % 2 ? "#0f0f0f" : "black")
     overflow: "hidden"
 
-    BackgroundImage {
-        id: image
-        width: this.parent.height
-        height: this.parent.height
-        src: this.parent.modelData.thumbnail
-        backgroundSize: "cover"
-    }
-
     Label {
-        left: this.image.left + this.image.width + 10
+        left: 10
         top: this.parent.height/2 - this.height/2
         text: this.parent.modelData.name
         color: this.ma.mousePressed ? "white" : "#3C7DC1"
@@ -165,9 +157,9 @@ Window {
     GridView {
         id: gridView
         delegate: GridDelegate;
-        delegateSize: this.parent.innerWidth/3.0
+        delegateSize: this.parent.innerWidth/(this.parent.innerWidth < 600 ? 3 : 10)
         width: this.parent.width
-        height: this.parent.height
+        height: this.parent.height - this.backButton.height
         left: this.parent.currentView === this ? 0 : this.width
 
         Behavior {
@@ -178,8 +170,8 @@ Window {
     Item {
         id: fullscreenImage
         src: ""
-        width: this.parent.innerWidth
-        height: this.parent.innerHeight
+        width: this.parent.width
+        height: this.parent.height - this.backButton.height
         left: this.parent.currentView === this ? 0 : this.width
         opacity: this.parent.currentView === this ? 1 : 0
         backgroundColor: "black"
