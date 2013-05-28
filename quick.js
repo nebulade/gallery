@@ -80,10 +80,6 @@ var tokenizer = (function () {
                 break;
             }
 
-            if (c === '\n') {
-                ++line;
-            }
-
             block += c;
 
             advance();
@@ -805,42 +801,42 @@ Quick.Item = function (id, parent, typeHint) {
     elem.addProperty("top", 0);
     elem.addProperty("left", 0);
 
-    elem.addProperty("childrenWidth", function () {
-        var left = 0;
-        var right = 0;
-        var kids = this.children();
-        for (var i in kids) {
-            if (kids.hasOwnProperty(i)) {
-                var c = kids[i];
-                if (c.left < left) {
-                    left = c.left;
-                }
-                if ((c.left + c.width) > right) {
-                    right = c.left + c.width;
-                }
-            }
-        }
+    // elem.addProperty("childrenWidth", function () {
+    //     var left = 0;
+    //     var right = 0;
+    //     var kids = this.children();
+    //     for (var i in kids) {
+    //         if (kids.hasOwnProperty(i)) {
+    //             var c = kids[i];
+    //             if (c.left < left) {
+    //                 left = c.left;
+    //             }
+    //             if ((c.left + c.width) > right) {
+    //                 right = c.left + c.width;
+    //             }
+    //         }
+    //     }
 
-        return (right - left);
-    });
-    elem.addProperty("childrenHeight", function () {
-        var top = 0;
-        var bottom = 0;
-        var kids = this.children();
-        for (var i in kids) {
-            if (kids.hasOwnProperty(i)) {
-                var c = kids[i];
-                if (c.top < top) {
-                    top = c.top;
-                }
-                if ((c.top + c.height) > bottom) {
-                    bottom = c.top + c.height;
-                }
-            }
-        }
+    //     return (right - left);
+    // });
+    // elem.addProperty("childrenHeight", function () {
+    //     var top = 0;
+    //     var bottom = 0;
+    //     var kids = this.children();
+    //     for (var i in kids) {
+    //         if (kids.hasOwnProperty(i)) {
+    //             var c = kids[i];
+    //             if (c.top < top) {
+    //                 top = c.top;
+    //             }
+    //             if ((c.top + c.height) > bottom) {
+    //                 bottom = c.top + c.height;
+    //             }
+    //         }
+    //     }
 
-        return (bottom - top);
-    });
+    //     return (bottom - top);
+    // });
 
 
     return elem;
@@ -1526,7 +1522,8 @@ Quick.useQueryFlags = function() {
 
 Quick.compileScriptTagElement = function(script) {
     var tokens = Quick.Tokenizer.parse(script.text);
-    Quick.Compiler.compileAndRender(tokens, {}, function (error, result) {
+    var moduleName = script.attributes.module && script.attributes.module.textContent;
+    Quick.Compiler.compileAndRender(tokens, { module: moduleName }, function (error, result) {
         if (error) {
             console.error("QuickJS compile error: " + error.line + ": " + error.message);
             console.error(" -- " + error.context);
@@ -1545,8 +1542,7 @@ Quick.compileScriptTagElement = function(script) {
                     eval(result);
                 }
             } catch (e) {
-                console.error("QuickJS error in generated JavaScript: " + e);
-                console.error(e);
+                console.error("QuickJS error in generated JavaScript: ", e);
             }
         }
     });
@@ -1747,17 +1743,21 @@ Quick.Element.prototype.removeChildren = function () {
 
 Quick.Element.prototype.addChild = function (child) {
     // adds child id to the namespace
-    this[child.id] = child;
+    if (child.id)
+        this[child.id] = child;
 
     // adds the parents id to the child
-    child[this.id] = this;
+    if (this.id)
+        child[this.id] = this;
 
     // add child to siblings scope and vice versa
-    var i;
-    for (i in this._children) {
+    for (var i in this._children) {
         if (this._children.hasOwnProperty(i)) {
-            this._children[i][child.id] = child;
-            child[this._children[i].id] = this._children[i];
+            if (child.id)
+                this._children[i][child.id] = child;
+
+            if (this._children[i].id)
+                child[this._children[i].id] = this._children[i];
         }
     }
 
@@ -1906,9 +1906,7 @@ Quick.Element.prototype.addProperty = function (name, value) {
     // register property
     this._properties[name] = value;
 
-    if (this.hasOwnProperty(name)) {
-        this.name = value;
-    } else {
+    if (!this.hasOwnProperty(name)) {
         Object.defineProperty(this, name, {
             get: function (silent) {
                 // console.log("getter: ", that.id, name);
@@ -1943,7 +1941,7 @@ Quick.Element.prototype.addProperty = function (name, value) {
 
 // initial set of all properties and binding evaluation
 // should only be called once
-Quick.Element.prototype.initializeBindings = function () {
+Quick.Element.prototype.initializeBindings = function (options) {
     var name, i;
 
     this._initializeBindingsStep = true;
@@ -1969,11 +1967,13 @@ Quick.Element.prototype.initializeBindings = function () {
     }
 
     // force property being set on the elements
-    this.render();
+    if (!options || !options.deferRender) {
+        this.render();
+    }
 
     for (i in this._children) {
         if (this._children.hasOwnProperty(i)) {
-            this._children[i].initializeBindings();
+            this._children[i].initializeBindings(options);
         }
     }
 

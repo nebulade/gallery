@@ -190,8 +190,41 @@ window.Quick.gallery = function () {
     
         });
         e.addChild((function() {
+            var e = new Quick.Item("toolbar");
+            e.addProperty("width", function () {return this.parent.width;});
+            e.addProperty("height", function () {return this.signOutButton.height;});
+            e.addProperty("backgroundColor", function () {return "#3C7DC1";});
+            e.addProperty("top", function () {return this.parent.currentView === this.listView ? 0 : -this.width;});
+            e.addChild((function() {
+                var e = new Quick.Behavior();
+                e.addProperty("top", function () {return "250ms";});
+                return e;
+            })());
+            e.addChild((function() {
+                var e = new Quick.Label("label");
+                e.addProperty("text", function () {return "Hello";});
+                e.addProperty("left", function () {return 10;});
+                e.addProperty("top", function () {return this.parent.height/2 - this.height/2;});
+                e.addProperty("color", function () {return "white";});
+                return e;
+            })());
+            e.addChild((function() {
+                var e = new Quick.Button("signOutButton");
+                e.addProperty("label", function () {return "Sign Out";});
+                e.addProperty("left", function () {return this.parent.width - this.width;});
+                e.addProperty("width", function () {return 200;});
+                e.addEventHandler("onactivated", function () {
+                app.signOut()
+                });
+                return e;
+            })());
+            return e;
+        })());
+        e.addChild((function() {
             var e = new Quick.ListView("listView");
+            e.addProperty("top", function () {return this.toolbar.height;});
             e.addProperty("left", function () {return this.parent.currentView === this ? 0 : -this.width;});
+            e.addProperty("height", function () {return this.parent.height - this.top;});
             e.createdelegate = function () {
                 return new Quick.ListDelegate();
             }

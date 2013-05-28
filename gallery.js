@@ -7,7 +7,7 @@ app.loadAlbum = function (album) {
 
     console.log("load album", album);
 
-    app.client.readdir(album.path, function (error, result, folderStat, resultsStat) {
+    app.client.readdir(album.path, function (error, result, folderStat, resultStats) {
         if (error) {
             console.error(error);
             return;
@@ -15,19 +15,21 @@ app.loadAlbum = function (album) {
 
         console.log("-- Pictures", result);
 
-        for (var i = 0; i < result.length; ++i) {
-            var stat = resultsStat[i];
+        var i = 0;
+        var grid = app.ui.window.gridView;
 
-            // ignore folder and files without thumbnail
-            if (stat.isFolder || !stat.hasThumbnail) {
-                continue;
+        function addDelegate() {
+            if (i >= result.length) {
+                return;
             }
 
-            (function () {
+            var stat = resultStats[i];
+
+            // ignore folder and files without thumbnail
+            if (!stat.isFolder && stat.hasThumbnail) {
                 var fullPath = album.path + "/" + result[i];
-                var thumbnailUrl = app.client.thumbnailUrl(fullPath, { size: "m" });
-                var imageUrl = app.client.thumbnailUrl(fullPath, { size: "l" });
-                var delegate = app.ui.window.gridView.addDelegate({name: result[i], image: imageUrl, thumbnail: thumbnailUrl});
+                var thumbnailUrl = app.client.thumbnailUrl(fullPath, { size: "l" });
+                var delegate = grid.addDelegate({name: result[i], image: "", thumbnail: thumbnailUrl});
 
                 app.client.makeUrl(fullPath, { download: true }, function (error, result) {
                     if (error) {
@@ -38,10 +40,28 @@ app.loadAlbum = function (album) {
                         delegate.image = result.url;
                     }
                 });
-            })();
+
+                // relayout....could be a bit smarter?
+                grid.layout();
+            }
+
+            window.setTimeout(function () {
+                ++i;
+                addDelegate();
+            }, 10);
         }
 
-        app.ui.window.gridView.layout();
+        addDelegate();
+    });
+};
+
+app.signOut = function () {
+    app.client.signOut(function (error) {
+        if (error) {
+            console.error(error);
+        }
+
+        window.location.reload();
     });
 };
 
@@ -63,7 +83,7 @@ function listAlbums (albumRoot) {
 }
 
 function init () {
-    app.client = new Dropbox.Client({ key: "wSDThTFVZRA=|jB82mur0JL3wTQY3QlxRLiX2HbVeA+yqsSpsG0kMZQ==" });
+    app.client = new Dropbox.Client({ key: "dQSjZUVTKJA=|Z92Wfc8sxU2jgfl9X5J9B9PDIG42c6eePuAHT3FS3Q==" });
     app.client.authDriver(new Dropbox.Drivers.Redirect({ rememberUser: true }));
 
     app.client.authenticate(function (error, client) {
@@ -95,14 +115,14 @@ function init () {
     Quick.Engine.start();
 }
 
-function initAuthenticated() {
-    app.client.getUserInfo(function(error, userInfo) {
+function initAuthenticated () {
+    app.client.getUserInfo(function (error, userInfo) {
         if (error) {
             console.error(error);
             return;
         }
 
-        console.log("Hello, " + userInfo.name + "!");
+        app.ui.window.toolbar.label.text = "Hello " + userInfo.name;
     });
 
     listAlbums("Photos");

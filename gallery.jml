@@ -144,9 +144,39 @@ Window {
             this.currentView = this.listView;
     }^
 
+    Item {
+        id: toolbar
+        width: this.parent.width
+        height: this.signOutButton.height
+        backgroundColor: "#3C7DC1"
+        top: this.parent.currentView === this.listView ? 0 : -this.width
+
+        Behavior {
+            top: "250ms"
+        }
+
+        Label {
+            id: label
+            text: "Hello"
+            left: 10
+            top: this.parent.height/2 - this.height/2
+            color: "white"
+        }
+
+        Button {
+            id: signOutButton
+            label: "Sign Out"
+            left: this.parent.width - this.width
+            width: 200
+            onactivated: app.signOut();
+        }
+    }
+
     ListView {
         id: listView
+        top: this.toolbar.height
         left: this.parent.currentView === this ? 0 : -this.width
+        height: this.parent.height - this.top
         delegate: ListDelegate;
 
         Behavior {
